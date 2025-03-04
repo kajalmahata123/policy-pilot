@@ -65,11 +65,7 @@ class RAGEngine:
             llm=self.llm,
             retriever=self.vector_store.as_retriever(
                 search_type="mmr",
-                search_kwargs={
-                    "k": 3,  # Number of documents to return
-                    "fetch_k": 5,  # Number of documents to fetch before filtering
-                    "lambda_mult": 0.7  # Controls diversity of results
-                }
+                search_kwargs=self._get_mmr_search_params("placeholder") #initial call to get default params
             ),
             memory=self.memory,
             condense_question_prompt=condense_prompt,
@@ -82,6 +78,9 @@ class RAGEngine:
         """Process a query and return the response with sources"""
         if not self.vector_store:
             return "Please upload some documents first.", []
+
+        # Update MMR parameters based on the current query
+        self.qa_chain.retriever.search_kwargs = self._get_mmr_search_params(query)
 
         # Get the result from the chain
         result = self.qa_chain({"question": query})
@@ -100,3 +99,31 @@ class RAGEngine:
                 history.append({"role": "assistant", "content": msg.content})
 
         return history
+
+    def _get_mmr_search_params(self, query: str) -> Dict:
+        """
+        Dynamically adjust MMR search parameters based on query characteristics
+        """
+        # Default parameters
+        params = {
+            "k": 3,
+            "fetch_k": 5,
+            "lambda_mult": 0.7,
+            "filter_similarity": 0.85
+        }
+
+        # Adjust for question complexity
+        if len(query.split()) > 15:  # Complex question
+            params.update({
+                "k": 4,
+                "fetch_k": 8,
+                "lambda_mult": 0.6  # Increase diversity for complex questions
+            })
+        elif "compare" in query.lower() or "difference" in query.lower():
+            params.update({
+                "k": 4,
+                "fetch_k": 6,
+                "lambda_mult": 0.5  # Maximum diversity for comparison questions
+            })
+
+        return params
