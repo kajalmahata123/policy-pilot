@@ -14,7 +14,8 @@ class RAGEngine:
         self.vector_store = vector_store
         self.memory = ConversationBufferMemory(
             memory_key="chat_history",
-            return_messages=True
+            return_messages=True,
+            output_key="answer"  # Explicitly specify the output key
         )
 
         self.qa_chain = self._create_qa_chain()
@@ -56,7 +57,8 @@ class RAGEngine:
             memory=self.memory,
             condense_question_prompt=condense_prompt,
             combine_docs_chain_kwargs={"prompt": qa_prompt},
-            return_source_documents=True
+            return_source_documents=True,
+            verbose=True  # Add verbose mode for better debugging
         )
 
     def process_query(self, query: str) -> Tuple[str, List[Dict]]:
