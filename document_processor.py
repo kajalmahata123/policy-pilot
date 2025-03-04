@@ -58,6 +58,9 @@ class DocumentProcessor:
         if vector_store is None:
             return {"total_chunks": 0}
 
+        # Use the correct way to get the number of documents in FAISS
+        total_chunks = len(vector_store.docstore._dict)
+
         return {
-            "total_chunks": vector_store._index.ntotal
+            "total_chunks": total_chunks
         }
