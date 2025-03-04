@@ -1,0 +1,41 @@
+/* Custom styles for the insurance policy RAG system */
+.stApp {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.upload-section {
+    padding: 20px;
+    border-radius: 10px;
+    border: 2px dashed #0066cc;
+    margin-bottom: 20px;
+}
+
+.chat-message {
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.user-message {
+    background-color: #e6f3ff;
+}
+
+.assistant-message {
+    background-color: #f0f2f6;
+}
+
+.source-reference {
+    font-size: 0.8em;
+    color: #666;
+    padding: 5px;
+    border-left: 3px solid #0066cc;
+    margin-top: 5px;
+}
+
+.document-status {
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    margin: 10px 0;
+}
