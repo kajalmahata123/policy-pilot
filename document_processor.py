@@ -18,6 +18,17 @@ class DocumentProcessor:
         self.embeddings = OpenAIEmbeddings()
         self.persist_directory = "chroma_db"
 
+        # Try to load existing vector store
+        if os.path.exists(self.persist_directory) and st.session_state.vector_store is None:
+            try:
+                st.session_state.vector_store = Chroma(
+                    persist_directory=self.persist_directory,
+                    embedding_function=self.embeddings
+                )
+            except Exception as e:
+                print(f"Error loading existing vector store: {e}")
+                st.session_state.vector_store = None
+
     def process_file(self, uploaded_file: BinaryIO) -> List:
         """Process a single uploaded file"""
         with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
