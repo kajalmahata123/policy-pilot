@@ -3,7 +3,7 @@ import os
 from langchain_community.document_loaders import PyPDFLoader, TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import OpenAIEmbeddings
-from langchain_community.vectorstores import FAISS
+from langchain_community.vectorstores import Chroma
 import streamlit as st
 import tempfile
 
@@ -16,6 +16,7 @@ class DocumentProcessor:
             length_function=len
         )
         self.embeddings = OpenAIEmbeddings()
+        self.persist_directory = "chroma_db"
 
     def process_file(self, uploaded_file: BinaryIO) -> List:
         """Process a single uploaded file"""
@@ -42,24 +43,30 @@ class DocumentProcessor:
         finally:
             os.unlink(tmp_file_path)
 
-    def update_vector_store(self, new_documents: List) -> FAISS:
+    def update_vector_store(self, new_documents: List) -> Chroma:
         """Update or create vector store with new documents"""
         if st.session_state.vector_store is None:
-            vector_store = FAISS.from_documents(new_documents, self.embeddings)
+            vector_store = Chroma.from_documents(
+                documents=new_documents,
+                embedding=self.embeddings,
+                persist_directory=self.persist_directory
+            )
         else:
-            current_store = st.session_state.vector_store
-            vector_store = current_store.add_documents(new_documents)
+            vector_store = st.session_state.vector_store
+            vector_store.add_documents(new_documents)
 
+        # Persist the changes
+        vector_store.persist()
         return vector_store
 
     @staticmethod
-    def get_document_stats(vector_store: FAISS) -> dict:
+    def get_document_stats(vector_store: Chroma) -> dict:
         """Get statistics about the processed documents"""
         if vector_store is None:
             return {"total_chunks": 0}
 
-        # Get the total number of documents using the index to docstore mapping
-        total_chunks = len(vector_store.index_to_docstore_id)
+        # Get collection stats from Chroma
+        total_chunks = vector_store._collection.count()
 
         return {
             "total_chunks": total_chunks

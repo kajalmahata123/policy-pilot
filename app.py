@@ -15,18 +15,18 @@ def main():
         page_icon="📋",
         layout="wide"
     )
-    
+
     load_css()
     init_session_state()
-    
+
     if not validate_api_key():
         return
 
     st.title("📋 Insurance Policy Assistant")
-    
+
     # Initialize processors
     doc_processor = DocumentProcessor()
-    
+
     # Sidebar for file upload and document status
     with st.sidebar:
         st.header("Document Upload")
@@ -44,7 +44,7 @@ def main():
                     if file.name not in [f.name for f in st.session_state.uploaded_files]:
                         splits = doc_processor.process_file(file)
                         all_splits.extend(splits)
-                
+
                 if all_splits:
                     st.session_state.vector_store = doc_processor.update_vector_store(all_splits)
                     st.session_state.uploaded_files = uploaded_files
@@ -54,8 +54,11 @@ def main():
             stats = doc_processor.get_document_stats(st.session_state.vector_store)
             st.markdown("### Document Statistics")
             st.markdown(f"Total chunks: {stats['total_chunks']}")
-            
+
             if st.button("Clear All Documents"):
+                if st.session_state.vector_store:
+                    # Properly close and delete Chroma collection
+                    st.session_state.vector_store._client.reset()
                 st.session_state.vector_store = None
                 st.session_state.uploaded_files = []
                 st.session_state.chat_history = []
@@ -64,26 +67,26 @@ def main():
     # Main chat interface
     if st.session_state.vector_store:
         rag_engine = RAGEngine(st.session_state.vector_store)
-        
+
         # Display chat history
         display_chat_history()
-        
+
         # Query input
         query = st.chat_input("Ask a question about your insurance policies")
-        
+
         if query:
             st.session_state.chat_history.append({"role": "user", "content": query})
-            
+
             with st.spinner("Thinking..."):
                 response, sources = rag_engine.process_query(query)
-                
+
                 message = {
                     "role": "assistant",
                     "content": response,
                     "sources": format_sources(sources)
                 }
                 st.session_state.chat_history.append(message)
-                
+
                 # Force a rerun to update the chat display
                 st.rerun()
     else:
