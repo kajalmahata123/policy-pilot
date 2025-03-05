@@ -1,8 +1,29 @@
 from typing import Dict
+"""LLMManager class handles interactions with language models for policy-related Q&A.
+
+This class manages the setup and configuration of a conversational AI system
+specialized in insurance policy questions and answers. It utilizes OpenAI's
+language models and LangChain's conversation management tools.
+
+Attributes:
+    llm (ChatOpenAI): Instance of ChatOpenAI configured with specific model and temperature.
+
+Methods:
+    create_conversation_memory(): Creates a windowed conversation memory buffer.
+    create_qa_chain(retriever, memory): Creates a QA chain with custom prompts.
+    get_condense_prompt(): Returns prompt template for condensing follow-up questions.
+    get_qa_prompt(): Returns prompt template for question answering.
+
+Example:
+    llm_manager = LLMManager()
+    memory = llm_manager.create_conversation_memory()
+    qa_chain = llm_manager.create_qa_chain(retriever, memory)
+"""
 from langchain_community.chat_models import ChatOpenAI
 from langchain_core.prompts import PromptTemplate
 from langchain.chains import ConversationalRetrievalChain
 from langchain.memory import ConversationBufferWindowMemory
+
 
 class LLMManager:
     def __init__(self):

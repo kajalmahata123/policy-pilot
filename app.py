@@ -1,3 +1,32 @@
+
+"""
+A Streamlit-based insurance policy assistant application that processes and analyzes insurance documents.
+
+This application provides a user interface for:
+- Uploading insurance policy documents (PDF or TXT)
+- Processing and vectorizing document content
+- Interactive chat interface to query insurance policy information
+- Display of document statistics and chat history
+
+The app uses RAG (Retrieval-Augmented Generation) to provide accurate responses based on the uploaded documents.
+
+Dependencies:
+    - streamlit
+    - document_processor module
+    - rag_engine module
+    - utils module (init_session_state, load_css, display_chat_history, validate_api_key, format_sources)
+
+Session State Variables:
+    - vector_store: Stores the vectorized document content
+    - uploaded_files: List of uploaded document files
+    - chat_history: List of user-assistant interactions
+
+Returns:
+    None
+
+Note:
+    Requires valid API key configuration to function properly.
+"""
 import streamlit as st
 from document_processor import DocumentProcessor
 from rag_engine import RAGEngine

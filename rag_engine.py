@@ -3,14 +3,35 @@ from langchain_core.messages import HumanMessage, AIMessage
 from llm import LLMManager
 
 class RAGEngine:
+    """
+    A class to handle retrieval-augmented generation (RAG) for question answering.
+
+    Attributes:
+        vector_store: The vector store used for document retrieval.
+        llm_manager: The manager for the language model.
+        memory: The conversation memory for the QA chain.
+        qa_chain: The question-answering chain with custom prompts.
+    """
+
     def __init__(self, vector_store):
+        """
+        Initializes the RAGEngine with a vector store and sets up the QA chain.
+
+        Args:
+            vector_store: The vector store used for document retrieval.
+        """
         self.vector_store = vector_store
         self.llm_manager = LLMManager()
         self.memory = self.llm_manager.create_conversation_memory()
         self.qa_chain = self._create_qa_chain()
 
     def _create_qa_chain(self):
-        """Create the QA chain with custom prompts"""
+        """
+        Creates the QA chain with custom prompts.
+
+        Returns:
+            The QA chain object.
+        """
         return self.llm_manager.create_qa_chain(
             retriever=self.vector_store.as_retriever(
                 search_type="mmr",
@@ -20,7 +41,15 @@ class RAGEngine:
         )
 
     def process_query(self, query: str) -> Tuple[str, List[Dict]]:
-        """Process a query and return the response with sources"""
+        """
+        Processes a query and returns the response with sources.
+
+        Args:
+            query: The query string to process.
+
+        Returns:
+            A tuple containing the answer string and a list of source documents.
+        """
         if not self.vector_store:
             return "Please upload some documents first.", []
 
@@ -33,7 +62,12 @@ class RAGEngine:
         return result["answer"], result["source_documents"]
 
     def get_chat_history(self) -> List[Dict]:
-        """Get the current chat history"""
+        """
+        Retrieves the current chat history.
+
+        Returns:
+            A list of dictionaries representing the chat history.
+        """
         messages = self.memory.chat_memory.messages
         history = []
 
@@ -47,7 +81,13 @@ class RAGEngine:
 
     def _get_mmr_search_params(self, query: str) -> Dict:
         """
-        Dynamically adjust MMR search parameters based on query characteristics
+        Dynamically adjusts MMR search parameters based on query characteristics.
+
+        Args:
+            query: The query string to analyze.
+
+        Returns:
+            A dictionary of MMR search parameters.
         """
         # Default parameters
         params = {
